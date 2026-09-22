@@ -16,6 +16,7 @@ public class EventResponseDto {
     private String tokenId;
 
     private String subject;
+    private String comments;
 
     @JsonProperty("member_id")
     private Long memberId;
@@ -95,6 +96,14 @@ public class EventResponseDto {
 
     public void setSubject(String subject) {
         this.subject = subject;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
     }
 
     public Long getMemberId() {

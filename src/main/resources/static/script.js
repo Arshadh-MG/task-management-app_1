@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- STATE MANAGER ---
     const state = {
-        theme: localStorage.getItem('lms_portal_theme') || 'dark',
+        theme: localStorage.getItem('lms_portal_theme') || 'light',
         submitting: false
     };
 
@@ -42,14 +42,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function applyTheme(theme) {
-        if (theme === 'light') {
-            body.classList.add('light-theme');
-            sunIcon && (sunIcon.style.display = 'none');
-            moonIcon && (moonIcon.style.display = 'block');
-        } else {
+        if (theme === 'dark') {
             body.classList.remove('light-theme');
+            body.classList.add('dark-theme');
             sunIcon && (sunIcon.style.display = 'block');
             moonIcon && (moonIcon.style.display = 'none');
+        } else {
+            body.classList.add('light-theme');
+            body.classList.remove('dark-theme');
+            sunIcon && (sunIcon.style.display = 'none');
+            moonIcon && (moonIcon.style.display = 'block');
         }
     }
 

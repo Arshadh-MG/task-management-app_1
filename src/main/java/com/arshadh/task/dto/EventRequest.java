@@ -25,6 +25,9 @@ public class EventRequest {
     @JsonProperty("subject")
     private String subject;
 
+    @JsonProperty("comments")
+    private String comments;
+
     @JsonProperty("memberId")
     private Long memberId;
 
@@ -99,6 +102,14 @@ public class EventRequest {
 
     public void setSubject(String subject) {
         this.subject = subject;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
     }
 
     public Long getMemberId() {

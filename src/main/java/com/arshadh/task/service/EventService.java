@@ -96,6 +96,7 @@ public class EventService {
             existing.setDescription(request.getDescription() != null ? request.getDescription().trim() : "");
             existing.setTokenId(request.getTokenId() != null ? request.getTokenId().trim() : null);
             existing.setSubject(request.getSubject() != null ? request.getSubject().trim() : null);
+            existing.setComments(request.getComments() != null ? request.getComments().trim() : "");
             existing.setMember(member);
             existing.setProduct(product);
             String newStatus = request.getStatus() != null && !request.getStatus().isBlank() ? request.getStatus().trim() : "progress";
@@ -125,6 +126,7 @@ public class EventService {
             event.setDescription(request.getDescription() != null ? request.getDescription().trim() : "");
             event.setTokenId(request.getTokenId() != null ? request.getTokenId().trim() : null);
             event.setSubject(request.getSubject() != null ? request.getSubject().trim() : null);
+            event.setComments(request.getComments() != null ? request.getComments().trim() : "");
             event.setMember(member);
             event.setProduct(product);
             event.setStatus(request.getStatus() != null && !request.getStatus().isBlank() ? request.getStatus().trim() : "progress");
@@ -175,6 +177,7 @@ public class EventService {
         dto.setDescription(event.getDescription());
         dto.setTokenId(event.getTokenId());
         dto.setSubject(event.getSubject());
+        dto.setComments(event.getComments());
         dto.setMemberId(event.getMember() != null ? event.getMember().getId() : null);
         dto.setProductId(event.getProduct() != null ? event.getProduct().getId() : null);
         dto.setProductName(event.getProduct() != null ? event.getProduct().getName() : null);

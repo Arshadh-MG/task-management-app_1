@@ -33,7 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const userNameEl = document.getElementById('userName');
     const userRoleEl = document.getElementById('userRole');
     const userAvatarEl = document.getElementById('userAvatar');
-    const profileBtn = document.getElementById('profileBtn');
 
     const themeToggleBtn = document.getElementById('themeToggleBtn');
     const sunIcon = themeToggleBtn?.querySelector('.sun-icon');
@@ -62,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const eventTokenIdInput = document.getElementById('eventTokenId');
     const eventTitleInput = document.getElementById('eventTitle');
     const eventDescriptionInput = document.getElementById('eventDescription');
+    const eventCommentsInput = document.getElementById('eventComments');
     const eventMemberIdSelect = document.getElementById('eventMemberId');
     const eventStatusSelect = document.getElementById('eventStatus');
     const deleteEventBtn = document.getElementById('deleteEventBtn');
@@ -85,6 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const detailsTokenId = document.getElementById('detailsTokenId');
     const detailsSubject = document.getElementById('detailsSubject');
     const detailsContent = document.getElementById('detailsContent');
+    const detailsComments = document.getElementById('detailsComments');
+    const detailsProduct = document.getElementById('detailsProduct');
     const detailsAssignee = document.getElementById('detailsAssignee');
     const detailsStatus = document.getElementById('detailsStatus');
     const detailsImagesGroup = document.getElementById('detailsImagesGroup');
@@ -106,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- STATE MANAGER ---
     const state = {
-        theme: localStorage.getItem('lms_portal_theme') || 'dark',
+        theme: localStorage.getItem('lms_portal_theme') || 'light',
         currentDate: new Date(), // Active month/year view
         events: [],              // All events loaded from backend
         products: [],            // List of available products
@@ -169,21 +171,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function applyTheme(theme) {
-        if (theme === 'light') {
-            document.body.classList.add('light-theme');
-            if (sunIcon) sunIcon.style.display = 'none';
-            if (moonIcon) moonIcon.style.display = 'block';
-        } else {
+        if (theme === 'dark') {
             document.body.classList.remove('light-theme');
+            document.body.classList.add('dark-theme');
             if (sunIcon) sunIcon.style.display = 'block';
             if (moonIcon) moonIcon.style.display = 'none';
+        } else {
+            document.body.classList.add('light-theme');
+            document.body.classList.remove('dark-theme');
+            if (sunIcon) sunIcon.style.display = 'none';
+            if (moonIcon) moonIcon.style.display = 'block';
         }
     }
-
-    // --- PROFILE BUTTON HANDLER ---
-    profileBtn?.addEventListener('click', () => {
-        window.location.href = './profile.html';
-    });
 
     // --- CALENDAR RENDER LOGIC ---
     function renderCalendar() {
@@ -844,6 +843,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (inputTr && inputTr.dataset.isSaving === 'true') return;
 
         const taskInp = document.getElementById('excelNewTask');
+        const commentsInp = document.getElementById('excelNewComments');
         const assignSel = document.getElementById('excelNewAssign');
         const statusSel = document.getElementById('excelNewStatus');
         const productSel = document.getElementById('excelNewProduct');
@@ -852,10 +852,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Reset previous validation borders
         taskInp.style.borderColor = '';
+        if (commentsInp) commentsInp.style.borderColor = '';
         assignSel.style.borderColor = '';
         productSel.style.borderColor = '';
 
         const content = taskInp.value.trim();
+        const comments = commentsInp ? commentsInp.value.trim() : '';
         const memberId = assignSel.value;
         const status = statusSel.value || 'progress';
         const productId = productSel.value;
@@ -908,6 +910,7 @@ document.addEventListener('DOMContentLoaded', () => {
             inputTr.style.opacity = '0.6';
         }
         taskInp.disabled = true;
+        if (commentsInp) commentsInp.disabled = true;
         assignSel.disabled = true;
         statusSel.disabled = true;
         productSel.disabled = true;
@@ -933,6 +936,7 @@ document.addEventListener('DOMContentLoaded', () => {
             userId: currentUser.userId || currentUser.id || 1,
             title: content || 'Update',
             description: content,
+            comments: comments,
             tokenId: '',
             memberId: parseInt(memberId),
             status: status,
@@ -966,6 +970,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     userId: currentUser.userId || currentUser.id || 1,
                     title: content || 'Update',
                     description: content,
+                    comments: comments,
                     tokenId: '',
                     member_id: parseInt(memberId),
                     memberId: parseInt(memberId),
@@ -1000,6 +1005,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 inputTr.style.opacity = '1';
             }
             taskInp.disabled = false;
+            if (commentsInp) commentsInp.disabled = false;
             assignSel.disabled = false;
             statusSel.disabled = false;
             productSel.disabled = false;
@@ -1087,7 +1093,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 </select>
             </td>
 
-            <!-- 5. Actions / Attachment Column -->
+            <!-- 5. Comments Column (Normal Input Box) -->
+            <td>
+                <input type="text" id="excelNewComments" class="excel-cell-input excel-comment-input" placeholder="Add comment...">
+            </td>
+
+            <!-- 6. Actions / Attachment Column -->
             <td style="text-align: center; vertical-align: middle;">
                 <div class="excel-cell-attach" id="excelNewAttachBtn" title="Attach image or Paste (Ctrl+V)" style="width: 100%; height: 26px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
@@ -1103,12 +1114,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const attachBtn = inputTr.querySelector('#excelNewAttachBtn');
         const fileInput = inputTr.querySelector('#excelNewFileInput');
         const taskTextarea = inputTr.querySelector('#excelNewTask');
+        const commentsTextarea = inputTr.querySelector('#excelNewComments');
         const assignSelect = inputTr.querySelector('#excelNewAssign');
         const productSelect = inputTr.querySelector('#excelNewProduct');
         const statusSelect = inputTr.querySelector('#excelNewStatus');
 
         // Clear error borders on user typing / selecting
         taskTextarea?.addEventListener('input', () => { taskTextarea.style.borderColor = ''; });
+        commentsTextarea?.addEventListener('input', () => { commentsTextarea.style.borderColor = ''; });
         assignSelect?.addEventListener('change', () => { assignSelect.style.borderColor = ''; });
         productSelect?.addEventListener('change', () => { productSelect.style.borderColor = ''; });
 
@@ -1264,7 +1277,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${productHtml}
                     </td>
 
-                    <!-- 5. Actions Column -->
+                    <!-- 5. Comments Column (Normal Input Box) -->
+                    <td>
+                        <input type="text" class="excel-cell-input row-comment-box" data-event-id="${evt.id}" placeholder="Add comment..." value="${escapeHtml(evt.comments || '')}">
+                    </td>
+
+                    <!-- 6. Actions Column -->
                     <td style="text-align: center;">
                         <div style="display: inline-flex; align-items: center; justify-content: center; gap: 4px;">
                             <button class="btn-icon btn-view" title="View Details" style="width: 24px; height: 24px; border-radius: 2px; padding: 0;">
@@ -1378,6 +1396,64 @@ document.addEventListener('DOMContentLoaded', () => {
                     viewBtn.addEventListener('click', () => openEditEventModal(evt));
                 }
 
+                // Wire row-level comment box auto-save
+                const rowCommentBox = tr.querySelector('.row-comment-box');
+                if (rowCommentBox) {
+                    const saveCurrentRowComment = async () => {
+                        const updatedVal = rowCommentBox.value.trim();
+                        if (updatedVal === (evt.comments || '').trim()) return;
+
+                        evt.comments = updatedVal;
+                        const curMemberId = evt.member_id != null ? evt.member_id : evt.memberId;
+                        const curProductId = evt.product_id != null ? evt.product_id : evt.productId;
+
+                        rowCommentBox.style.borderColor = 'var(--accent)';
+                        try {
+                            const updatePayload = {
+                                id: evt.id,
+                                userId: currentUser.userId || currentUser.id || 1,
+                                title: evt.title || evt.description || 'Update',
+                                description: evt.description || evt.title || '',
+                                comments: updatedVal,
+                                tokenId: evt.token_id || evt.tokenId || '',
+                                memberId: curMemberId ? parseInt(curMemberId) : null,
+                                status: evt.status || 'progress',
+                                productId: curProductId ? parseInt(curProductId) : null,
+                                eventDate: evt.event_date || evt.eventDate || state.selectedDate,
+                                images: typeof evt.images === 'string' ? evt.images : JSON.stringify(evt.images || [])
+                            };
+
+                            const response = await fetch('/api/events', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(updatePayload)
+                            });
+
+                            if (response.ok) {
+                                rowCommentBox.style.borderColor = '#10b981';
+                                setTimeout(() => { rowCommentBox.style.borderColor = ''; }, 1000);
+                                const evIdx = state.events.findIndex(e => String(e.id) === String(evt.id));
+                                if (evIdx !== -1) {
+                                    state.events[evIdx].comments = updatedVal;
+                                }
+                            } else {
+                                rowCommentBox.style.borderColor = '#ef4444';
+                            }
+                        } catch (err) {
+                            console.error('Error auto-saving comment:', err);
+                            rowCommentBox.style.borderColor = '#ef4444';
+                        }
+                    };
+
+                    rowCommentBox.addEventListener('blur', saveCurrentRowComment);
+                    rowCommentBox.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            rowCommentBox.blur();
+                        }
+                    });
+                }
+
                 // Wire EDIT button -> in-place inline edit with Save/Cancel
                 const editBtn = tr.querySelector('.btn-edit');
                 if (editBtn) {
@@ -1432,6 +1508,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <select class="excel-cell-select edit-product-select">
                                     ${editProductOptions}
                                 </select>
+                            </td>
+                            <td>
+                                <input type="text" class="excel-cell-input edit-comments-input" placeholder="Add comment..." value="${escapeHtml(evt.comments || '')}">
                             </td>
                             <td style="text-align: center; vertical-align: middle;">
                                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;">
@@ -1556,6 +1635,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (editTr.dataset.isSaving === 'true') return;
 
                             const newContent = editTr.querySelector('.edit-task-input').value.trim();
+                            const newComments = editTr.querySelector('.edit-comments-input') ? editTr.querySelector('.edit-comments-input').value.trim() : '';
                             const newMemberId = editTr.querySelector('.edit-assign-select').value;
                             const newStatus = editTr.querySelector('.edit-status-select').value;
                             const newProductId = editTr.querySelector('.edit-product-select').value;
@@ -1597,6 +1677,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 userId: currentUser.userId || currentUser.id || 1,
                                 title: newContent || 'Update',
                                 description: newContent,
+                                comments: newComments,
                                 tokenId: evt.token_id || evt.tokenId || '',
                                 memberId: parseInt(newMemberId),
                                 status: newStatus,
@@ -1625,6 +1706,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                             ...state.events[idx],
                                             description: newContent,
                                             title: newContent || 'Update',
+                                            comments: newComments,
                                             member_id: parseInt(newMemberId),
                                             memberId: parseInt(newMemberId),
                                             product_id: parseInt(newProductId),
@@ -1710,6 +1792,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (detailsTokenId) detailsTokenId.textContent = eventObj.token_id || eventObj.tokenId || '';
         if (detailsSubject) detailsSubject.textContent = eventObj.title || '';
         if (detailsContent) detailsContent.textContent = eventObj.description || eventObj.title || 'No content details provided.';
+        if (detailsComments) {
+            const comStr = (eventObj.comments != null ? String(eventObj.comments).trim() : '');
+            detailsComments.textContent = comStr || 'No comments provided.';
+            detailsComments.style.color = comStr ? 'var(--text)' : 'var(--muted)';
+        }
+        if (eventCommentsInput) eventCommentsInput.value = eventObj.comments || '';
 
         // Find assignee name
         let assigneeName = 'Unassigned';
@@ -1721,6 +1809,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         if (detailsAssignee) detailsAssignee.textContent = assigneeName;
+
+        // Find product name
+        let productName = eventObj.product_name || eventObj.productName || '';
+        const prodId = eventObj.product_id != null ? eventObj.product_id : eventObj.productId;
+        if (!productName && prodId && state.products) {
+            const prod = state.products.find(p => p.id === prodId || String(p.id) === String(prodId));
+            if (prod) productName = prod.name;
+        }
+        if (!productName) productName = 'General';
+        if (detailsProduct) detailsProduct.textContent = productName;
+
         if (detailsStatus) detailsStatus.textContent = eventObj.status === 'completed' ? 'Completed' : 'In Progress';
 
         // Show images if any
@@ -1759,6 +1858,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const title = eventTitleInput?.value.trim() || '';
         const description = eventDescriptionInput?.value.trim() || '';
+        const comments = eventCommentsInput?.value.trim() || '';
         const tokenId = eventTokenIdInput?.value.trim() || '';
         const memberId = eventMemberIdSelect ? eventMemberIdSelect.value : null;
         const status = eventStatusSelect ? eventStatusSelect.value : 'progress';
@@ -1803,6 +1903,7 @@ document.addEventListener('DOMContentLoaded', () => {
             userId: currentUser.userId || currentUser.id || 1,
             title,
             description,
+            comments,
             tokenId,
             subject,
             memberId,

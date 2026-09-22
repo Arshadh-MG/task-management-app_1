@@ -9,6 +9,16 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { }
     }
 
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
     // --- DOM REFERENCES ---
     const adminNameEl = document.getElementById('adminName');
     const adminEmailDisplay = document.getElementById('adminEmailDisplay');
@@ -66,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- STATE ---
     const state = {
-        theme: localStorage.getItem('lms_portal_theme') || 'dark',
+        theme: localStorage.getItem('lms_portal_theme') || 'light',
         users: [],
         events: [],
         products: [],
@@ -91,14 +101,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function applyTheme(theme) {
-        if (theme === 'light') {
-            document.body.classList.add('light-theme');
-            if (sunIcon) sunIcon.style.display = 'none';
-            if (moonIcon) moonIcon.style.display = 'block';
-        } else {
+        if (theme === 'dark') {
             document.body.classList.remove('light-theme');
+            document.body.classList.add('dark-theme');
             if (sunIcon) sunIcon.style.display = 'block';
             if (moonIcon) moonIcon.style.display = 'none';
+        } else {
+            document.body.classList.add('light-theme');
+            document.body.classList.remove('dark-theme');
+            if (sunIcon) sunIcon.style.display = 'none';
+            if (moonIcon) moonIcon.style.display = 'block';
         }
     }
 
@@ -592,6 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!state.searchQuery) return true;
                 return (e.title && e.title.toLowerCase().includes(state.searchQuery)) ||
                        (e.description && e.description.toLowerCase().includes(state.searchQuery)) ||
+                       (e.comments && e.comments.toLowerCase().includes(state.searchQuery)) ||
                        (e.token_id && e.token_id.toLowerCase().includes(state.searchQuery));
             })
             .sort((a, b) => {
@@ -677,6 +690,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             }
 
+            // Comments block if available
+            let commentsHtml = '';
+            const commentStr = (evt.comments || '').trim();
+            if (commentStr) {
+                commentsHtml = `
+                    <div class="day-update-comments-block" style="margin: 0.45rem 0 0.35rem 0; padding: 0.5rem 0.75rem; background: var(--surface-input, rgba(0,0,0,0.03)); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 4px; font-size: 0.84rem;">
+                        <div style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--accent); margin-bottom: 3px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            <span>Comment</span>
+                        </div>
+                        <div style="color: var(--text); line-height: 1.45; white-space: pre-wrap; word-break: break-word;">${escapeHtml(commentStr)}</div>
+                    </div>
+                `;
+            }
+
+            // Product badge if available
+            let productBadgeHtml = '';
+            let prodName = (evt.product_name || evt.productName || '').trim();
+            if (!prodName && evt.product_id && state.products) {
+                const p = state.products.find(prod => prod.id === evt.product_id || String(prod.id) === String(evt.product_id));
+                if (p) prodName = p.name;
+            }
+            if (prodName) {
+                productBadgeHtml = `
+                    <span class="day-update-token" style="background: rgba(168, 85, 247, 0.1); color: #a855f7; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;">
+                        ${escapeHtml(prodName)}
+                    </span>
+                `;
+            }
+
             const isCompleted = evt.status === 'completed';
             const radioColor = isCompleted ? '#10b981' : '#f59e0b';
 
@@ -697,9 +740,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 ${contentBodyHtml}
+                ${commentsHtml}
                 ${imagesHtml}
-                <div class="day-update-footer">
+                <div class="day-update-footer" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
                     ${assigneeHtml}
+                    ${productBadgeHtml}
                 </div>
             `;
 

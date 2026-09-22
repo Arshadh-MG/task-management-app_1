@@ -28,6 +28,9 @@ public class Event {
     @Column(name = "subject", columnDefinition = "TEXT")
     private String subject;
 
+    @Column(name = "comments", columnDefinition = "TEXT")
+    private String comments;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private User member;
@@ -131,6 +134,14 @@ public class Event {
 
     public void setSubject(String subject) {
         this.subject = subject;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
     }
 
     public User getMember() {
