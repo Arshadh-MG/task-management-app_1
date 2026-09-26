@@ -1763,6 +1763,7 @@ body:not(.light-theme) .day-updates-table-wrapper {
 
 .day-updates-table {
     width: 100% !important;
+    table-layout: fixed !important;
     border-collapse: collapse !important;
     border-spacing: 0 !important;
     text-align: left !important;
@@ -1800,6 +1801,10 @@ body:not(.light-theme) .day-updates-table thead tr {
     vertical-align: middle !important;
     margin: 0 !important;
     border-radius: 0 !important;
+    box-sizing: border-box !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    word-wrap: break-word !important;
 }
 
 body.dark-theme .day-updates-table th,
@@ -1816,6 +1821,10 @@ body:not(.light-theme) .day-updates-table th {
     background: #ffffff !important;
     margin: 0 !important;
     border-radius: 0 !important;
+    box-sizing: border-box !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    word-wrap: break-word !important;
 }
 
 body.dark-theme .day-updates-table td,
@@ -1856,10 +1865,14 @@ body:not(.light-theme) .day-updates-table tbody tr.excel-new-update-row {
     background: rgba(255, 255, 255, 0.02) !important;
 }
 
-textarea.excel-cell-input {
+textarea.excel-cell-input,
+textarea.excel-comment-input,
+textarea.row-comment-box,
+textarea.edit-comments-input {
     width: 100% !important;
-    min-height: 48px !important;
-    height: 48px !important;
+    min-height: 44px !important;
+    max-height: 140px !important;
+    height: auto;
     padding: 6px 8px !important;
     font-size: 0.85rem !important;
     line-height: 1.4 !important;
@@ -1868,16 +1881,31 @@ textarea.excel-cell-input {
     background: #ffffff !important;
     color: #0f172a !important;
     outline: none !important;
-    resize: vertical !important;
+    resize: none !important;
+    overflow-y: auto !important;
+    scrollbar-width: thin !important;
     font-family: inherit !important;
     box-sizing: border-box !important;
     margin: 0 !important;
+    display: block !important;
 }
 
-input.excel-cell-input,
-.excel-comment-input,
-.row-comment-box,
-.edit-comments-input {
+textarea.excel-cell-input::-webkit-scrollbar,
+textarea.excel-comment-input::-webkit-scrollbar,
+textarea.row-comment-box::-webkit-scrollbar,
+textarea.edit-comments-input::-webkit-scrollbar {
+    width: 5px;
+}
+
+textarea.excel-cell-input::-webkit-scrollbar-thumb,
+textarea.excel-comment-input::-webkit-scrollbar-thumb,
+textarea.row-comment-box::-webkit-scrollbar-thumb,
+textarea.edit-comments-input::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 3px;
+}
+
+input.excel-cell-input {
     width: 100% !important;
     height: 28px !important;
     min-height: 28px !important;

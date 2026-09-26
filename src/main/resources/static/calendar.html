@@ -12,7 +12,7 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
     <!-- Custom CSS stylesheet -->
-    <link rel="stylesheet" href="style.css?v=6.3">
+    <link rel="stylesheet" href="style.css?v=7.5">
 </head>
 
 <body class="calendar-page light-theme">
@@ -235,7 +235,15 @@
                 <div class="day-updates-table-wrapper"
                     style="margin-top: 0.5rem; background: var(--surface); border: 1px solid var(--border); overflow-x: auto;">
                     <table class="day-updates-table"
-                        style="width: 100%; border-collapse: collapse; border-spacing: 0; text-align: left; font-size: 0.85rem; border: 1px solid var(--border); margin: 0;">
+                        style="width: 100%; table-layout: fixed; border-collapse: collapse; border-spacing: 0; text-align: left; font-size: 0.85rem; border: 1px solid var(--border); margin: 0;">
+                        <colgroup>
+                            <col style="width: 28%;">
+                            <col style="width: 12%;">
+                            <col style="width: 14%;">
+                            <col style="width: 13%;">
+                            <col style="width: 24%;">
+                            <col style="width: 9%;">
+                        </colgroup>
                         <thead>
                             <tr style="background: var(--surface-strong);">
                                 <th
@@ -410,7 +418,7 @@
     </div>
 
     <!-- Core logic script -->
-    <script src="calendar.js?v=6.4"></script>
+    <script src="calendar.js?v=7.5"></script>
 </body>
 
 </html>

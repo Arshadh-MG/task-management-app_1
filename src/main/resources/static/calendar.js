@@ -10,6 +10,20 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/'/g, '&#039;');
     }
 
+    // Auto-resize textarea vertically based on content with scrollable max height
+    function autoResizeTextarea(el, minHeight = 44, maxHeight = 140) {
+        if (!el) return;
+        el.style.height = 'auto';
+        const scrollH = el.scrollHeight;
+        const newHeight = Math.min(maxHeight, Math.max(minHeight, scrollH));
+        el.style.height = newHeight + 'px';
+        if (scrollH > maxHeight) {
+            el.style.overflowY = 'auto';
+        } else {
+            el.style.overflowY = 'hidden';
+        }
+    }
+
     // --- USER SESSION (Direct workspace access) ---
     const userJson = localStorage.getItem('user');
     let currentUser = { id: 1, userId: 1, fullName: 'Admin', email: 'admin123@gmail.com', role: 'Administrator' };
@@ -1093,9 +1107,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 </select>
             </td>
 
-            <!-- 5. Comments Column (Normal Input Box) -->
+            <!-- 5. Comments Column (Textarea Input Box) -->
             <td>
-                <input type="text" id="excelNewComments" class="excel-cell-input excel-comment-input" placeholder="Add comment...">
+                <textarea id="excelNewComments" class="excel-cell-input excel-comment-input" placeholder="Add comment..."></textarea>
             </td>
 
             <!-- 6. Actions / Attachment Column -->
@@ -1119,9 +1133,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const productSelect = inputTr.querySelector('#excelNewProduct');
         const statusSelect = inputTr.querySelector('#excelNewStatus');
 
-        // Clear error borders on user typing / selecting
-        taskTextarea?.addEventListener('input', () => { taskTextarea.style.borderColor = ''; });
-        commentsTextarea?.addEventListener('input', () => { commentsTextarea.style.borderColor = ''; });
+        // Clear error borders on user typing / selecting & dynamically auto-expand height based on content
+        taskTextarea?.addEventListener('input', () => {
+            taskTextarea.style.borderColor = '';
+            autoResizeTextarea(taskTextarea, 44, 140);
+        });
+        autoResizeTextarea(taskTextarea, 44, 140);
+
+        commentsTextarea?.addEventListener('input', () => {
+            commentsTextarea.style.borderColor = '';
+            autoResizeTextarea(commentsTextarea, 44, 140);
+        });
+        autoResizeTextarea(commentsTextarea, 44, 140);
+
         assignSelect?.addEventListener('change', () => { assignSelect.style.borderColor = ''; });
         productSelect?.addEventListener('change', () => { productSelect.style.borderColor = ''; });
 
@@ -1277,9 +1301,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${productHtml}
                     </td>
 
-                    <!-- 5. Comments Column (Normal Input Box) -->
+                    <!-- 5. Comments Column (Textarea Input Box) -->
                     <td>
-                        <input type="text" class="excel-cell-input row-comment-box" data-event-id="${evt.id}" placeholder="Add comment..." value="${escapeHtml(evt.comments || '')}">
+                        <textarea class="excel-cell-input row-comment-box" data-event-id="${evt.id}" placeholder="Add comment...">${escapeHtml(evt.comments || '')}</textarea>
                     </td>
 
                     <!-- 6. Actions Column -->
@@ -1399,6 +1423,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Wire row-level comment box auto-save
                 const rowCommentBox = tr.querySelector('.row-comment-box');
                 if (rowCommentBox) {
+                    autoResizeTextarea(rowCommentBox, 44, 140);
+                    rowCommentBox.addEventListener('input', () => {
+                        autoResizeTextarea(rowCommentBox, 44, 140);
+                    });
+
                     const saveCurrentRowComment = async () => {
                         const updatedVal = rowCommentBox.value.trim();
                         if (updatedVal === (evt.comments || '').trim()) return;
@@ -1510,7 +1539,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </select>
                             </td>
                             <td>
-                                <input type="text" class="excel-cell-input edit-comments-input" placeholder="Add comment..." value="${escapeHtml(evt.comments || '')}">
+                                <textarea class="excel-cell-input edit-comments-input" placeholder="Add comment...">${escapeHtml(evt.comments || '')}</textarea>
                             </td>
                             <td style="text-align: center; vertical-align: middle;">
                                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;">
@@ -1588,6 +1617,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         const editAttachBtn = editTr.querySelector('.edit-attach-btn');
                         const editFileInput = editTr.querySelector('.edit-file-input');
                         const editTaskInput = editTr.querySelector('.edit-task-input');
+                        const editCommentsInput = editTr.querySelector('.edit-comments-input');
+
+                        autoResizeTextarea(editTaskInput, 44, 140);
+                        editTaskInput?.addEventListener('input', () => {
+                            autoResizeTextarea(editTaskInput, 44, 140);
+                        });
+
+                        autoResizeTextarea(editCommentsInput, 44, 140);
+                        editCommentsInput?.addEventListener('input', () => {
+                            autoResizeTextarea(editCommentsInput, 44, 140);
+                        });
 
                         editAttachBtn?.addEventListener('click', () => editFileInput?.click());
 
@@ -1763,10 +1803,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 dayUpdatesTableBody.appendChild(tr);
+
+                if (rowCommentBox) {
+                    autoResizeTextarea(rowCommentBox, 44, 140);
+                }
             } catch (renderErr) {
                 console.error('Error rendering update row:', renderErr, evt);
             }
         });
+
+        // Trigger auto-resize on all textareas once full DOM layout is ready
+        setTimeout(() => {
+            if (dayUpdatesTableBody) {
+                dayUpdatesTableBody.querySelectorAll('textarea').forEach(ta => {
+                    autoResizeTextarea(ta, 44, 140);
+                });
+            }
+        }, 10);
     }
 
     function setModalMode(isReadOnly) {
